@@ -22,7 +22,9 @@ def load_model_objects():
     except:
         return None, None, None, None, None
 
+
 model_bnb, model_svm, model_ensemble, vectorizer, tools = load_model_objects()
+
 
 # Preprocessing teks
 def preprocess_text(text, stopword_remover, stemmer):
@@ -31,6 +33,7 @@ def preprocess_text(text, stopword_remover, stemmer):
     text = stopword_remover.remove(text)
     text = stemmer.stem(text)
     return text
+
 
 # Confidence label
 def get_confidence_badge(prob):
@@ -41,9 +44,11 @@ def get_confidence_badge(prob):
     else:
         return "🔴 Rendah", "error"
 
+
 # UI Utama
 st.title("🎬 Analisis Sentimen Film")
 st.markdown("### Ensemble Model (BernoulliNB + SVM)")
+
 
 models_loaded = all([model_bnb, model_svm, model_ensemble, vectorizer, tools])
 
@@ -53,7 +58,7 @@ else:
     st.subheader("✍ Masukkan Ulasan Film")
 
     example_texts = [
-        "Filmnya bagus banget, alurnya tidak ketebak!",
+        "Filmmya bagus banget, alurnya tidak ketebak!",
         "Film jelek, buang waktu saja",
         "Keren, aktingnya mantap sekali",
         "Goblok banget filmnya tidak bermutu",
@@ -86,6 +91,7 @@ else:
                 try:
                     stopword_remover = tools['stopword']
                     stemmer = tools['stemmer']
+
                     processed = preprocess_text(input_text, stopword_remover, stemmer)
                     vec = vectorizer.transform([processed])
 
@@ -103,14 +109,20 @@ else:
                     conf_text, conf_type = get_confidence_badge(max_prob)
 
                     if pred_ensemble == "positive":
-                        st.success("### ✅ Sentimen: POSITIF")
+                        st.success(f"### ✅ Sentimen: POSITIF")
                     else:
-                        st.error("### ❌ Sentimen: NEGATIF")
+                        st.error(f"### ❌ Sentimen: NEGATIF")
 
-                    st.info(f"Tingkat Keyakinan: {conf_text} ({max_prob:.1f}%)")
+                    st.info(f"*Tingkat Keyakinan:* {conf_text} ({max_prob:.1f}%)")
 
                     # Probabilitas
                     st.write("📊 Probabilitas:")
                     col1, col2 = st.columns(2)
                     with col1:
                         st.metric("Negatif", f"{prob_ensemble[0]*100:.1f}%")
+                    with col2:
+                        st.metric("Positif", f"{prob_ensemble[1]*100:.1f}%")
+
+                except Exception as e:
+                    st.error("Terjadi kesalahan saat analisis.")
+                    st.code(str(e))
